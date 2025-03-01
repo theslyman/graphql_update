@@ -54,6 +54,7 @@ async function showProfile() {
 
   const jwt = localStorage.getItem('jwt');
   if (!jwt) {
+    console.log('No JWT found, showing login');
     showLogin();
     return;
   }
@@ -68,8 +69,9 @@ async function showProfile() {
         }
       }
     `);
+    console.log('User Data:', userData);
     if (!userData.data?.user?.[0]?.login) throw new Error('User data not found');
-    document.getElementById('username').textContent = userData.data.user[0].login;
+    document.getElementById('username').textContent = userData.data.user[0].login || 'N/A';
 
     // Fetch total XP
     const xpData = await fetchGraphQL(jwt, `
@@ -83,6 +85,7 @@ async function showProfile() {
         }
       }
     `);
+    console.log('XP Data:', xpData);
     const totalXP = xpData.data?.transaction_aggregate?.aggregate?.sum?.amount || 0;
     document.getElementById('total-xp').textContent = totalXP;
 
@@ -94,6 +97,7 @@ async function showProfile() {
         }
       }
     `);
+    console.log('Result Data:', resultData);
     const results = resultData.data?.result || [];
     const passes = results.filter(r => r.grade === 1).length;
     const fails = results.filter(r => r.grade === 0).length;
@@ -109,6 +113,7 @@ async function showProfile() {
         }
       }
     `);
+    console.log('XP Over Time Data:', xpOverTimeData);
     renderXpOverTime(xpOverTimeData.data?.transaction || []);
 
     // Fetch XP per project
@@ -122,16 +127,19 @@ async function showProfile() {
         }
       }
     `);
+    console.log('XP Per Project Data:', xpPerProjectData);
     renderXpPerProject(xpPerProjectData.data?.transaction || []);
 
   } catch (error) {
     console.error('Error in showProfile:', error.message);
-    // Only show login if JWT is explicitly invalid
+    // Only revert to login if JWT is invalid
     if (error.message.includes('Failed to fetch data')) {
-      localStorage.removeItem('jwt'); // Clear invalid JWT
+      console.log('JWT likely invalid, clearing and showing login');
+      localStorage.removeItem('jwt');
       showLogin();
+    } else {
+      console.log('Keeping profile visible with partial data');
     }
-    // Otherwise, keep profile visible with partial data
   }
 }
 // Helper function to fetch GraphQL data
