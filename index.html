@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Page</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Login Section -->
+  <div id="login-section">
+    <h2>Login</h2>
+    <form id="login-form">
+      <label for="usernameOrEmail">Username or Email:</label>
+      <input type="text" id="usernameOrEmail" required>
+      <label for="password">Password:</label>
+      <input type="password" id="password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="error-message" style="display: none;">Invalid credentials</p>
+  </div>
+
+  <!-- Profile Section (hidden initially) -->
+  <div id="profile-section" style="display: none;">
+    <h2>Profile</h2>
+    <marquee>Welcome to the 90s Profile Page!</marquee>
+    <button id="logout-button">Logout</button>
+    <div id="user-info">
+      <p><strong>Username:</strong> <span id="username"></span></p>
+      <p><strong>Total XP:</strong> <span id="total-xp"></span></p>
+      <p><strong>Pass/Fail Ratio:</strong> <span id="pass-fail-ratio"></span></p>
+    </div>
+    <div id="graphs">
+      <h3>XP Over Time</h3>
+      <svg id="xp-over-time" width="500" height="300"></svg>
+      <h3>XP Per Project</h3>
+      <svg id="xp-per-project" width="500" height="300"></svg>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
