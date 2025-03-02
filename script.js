@@ -74,9 +74,10 @@ async function showProfile() {
         }
       }
     `);
-    console.log('User Data:', userData);
-    if (!userData.data?.user?.[0]?.login) throw new Error('User data not found');
-    document.getElementById('username').textContent = userData.data.user[0].login || 'N/A';
+    console.log('Raw User Data Response:', userData);
+    if (!userData.data?.user) throw new Error('User data not found or empty');
+    const user = Array.isArray(userData.data.user) ? userData.data.user[0] : userData.data.user;
+    document.getElementById('username').textContent = user.login || 'N/A';
 
     // Fetch total XP
     const xpData = await fetchGraphQL(jwt, `
@@ -90,7 +91,6 @@ async function showProfile() {
         }
       }
     `);
-    console.log('XP Data:', xpData);
     const totalXP = xpData.data?.transaction_aggregate?.aggregate?.sum?.amount || 0;
     document.getElementById('total-xp').textContent = totalXP;
 
@@ -102,7 +102,6 @@ async function showProfile() {
         }
       }
     `);
-    console.log('Result Data:', resultData);
     const results = resultData.data?.result || [];
     const passes = results.filter(r => r.grade === 1).length;
     const fails = results.filter(r => r.grade === 0).length;
@@ -118,32 +117,34 @@ async function showProfile() {
         }
       }
     `);
-    console.log('XP Over Time Data:', xpOverTimeData);
     renderXpOverTime(xpOverTimeData.data?.transaction || []);
 
-    // Fetch XP per project
-    const xpPerProjectData = await fetchGraphQL(jwt, `
+    // Fetch audit data (replace XP per project)
+    const auditData = await fetchGraphQL(jwt, `
       {
-        transaction(where: { type: { _eq: "xp" } }) {
-          amount
-          object {
-            name
+        received: transaction_aggregate(where: { type: { _eq: "audit" }, path: { _like: "%received%" } }) {
+          aggregate {
+            count
+          }
+        }
+        given: transaction_aggregate(where: { type: { _eq: "audit" }, path: { _like: "%given%" } }) {
+          aggregate {
+            count
           }
         }
       }
     `);
-    console.log('XP Per Project Data:', xpPerProjectData);
-    renderXpPerProject(xpPerProjectData.data?.transaction || []);
+    console.log('Audit Data:', auditData);
+    renderAuditRatio({
+      received: auditData.data?.received?.aggregate?.count || 0,
+      given: auditData.data?.given?.aggregate?.count || 0
+    });
 
   } catch (error) {
     console.error('Error in showProfile:', error.message);
-    // Only revert to login if JWT is invalid
     if (error.message.includes('Failed to fetch data')) {
-      console.log('JWT likely invalid, clearing and showing login');
       localStorage.removeItem('jwt');
       showLogin();
-    } else {
-      console.log('Keeping profile visible with partial data');
     }
   }
 }
@@ -264,87 +265,95 @@ function renderXpOverTime(transactions) {
   }
 }
 
-// Render XP per project graph (bar chart)
-function renderXpPerProject(transactions) {
-  const svg = document.getElementById('xp-per-project');
+/// Render Audit Ratio as a pie chart
+function renderAuditRatio(auditData) {
+  const svg = document.getElementById('xp-per-project'); // Reuse existing SVG element
   svg.innerHTML = ''; // Clear previous content
 
-  if (transactions.length === 0) {
+  const { received, given } = auditData;
+  const total = received + given;
+
+  if (total === 0) {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
-    text.textContent = 'No XP data available';
+    text.textContent = 'No audit data available';
     svg.appendChild(text);
     return;
   }
 
-  // Group by project name and sum XP
-  const projectXP = {};
-  transactions.forEach(t => {
-    const project = t.object.name;
-    projectXP[project] = (projectXP[project] || 0) + t.amount;
-  });
-
-  const projects = Object.entries(projectXP);
-  const maxXP = Math.max(...projects.map(p => p[1]));
-
   // SVG dimensions
   const width = 500;
   const height = 300;
-  const padding = 50; // Increased padding for labels
-  const barWidth = (width - 2 * padding) / projects.length;
+  const radius = Math.min(width, height) / 2 - 50; // Leave space for labels
+  const centerX = width / 2;
+  const centerY = height / 2;
 
-  // Scales
-  const yScale = (xp) => height - padding - (xp / maxXP) * (height - 2 * padding);
+  // Pie chart data
+  const angles = {
+    received: (received / total) * 2 * Math.PI,
+    given: (given / total) * 2 * Math.PI
+  };
 
-  // Draw bars
-  projects.forEach((p, i) => {
-    const bar = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    bar.setAttribute('x', padding + i * barWidth);
-    bar.setAttribute('y', yScale(p[1]));
-    bar.setAttribute('width', barWidth - 10);
-    bar.setAttribute('height', height - padding - yScale(p[1]));
-    bar.setAttribute('fill', 'green');
-    svg.appendChild(bar);
+  // Function to create arc path
+  function createArc(startAngle, endAngle, color) {
+    const startX = centerX + radius * Math.cos(startAngle);
+    const startY = centerY + radius * Math.sin(startAngle);
+    const endX = centerX + radius * Math.cos(endAngle);
+    const endY = centerY + radius * Math.sin(endAngle);
+    const largeArcFlag = endAngle - startAngle <= Math.PI ? 0 : 1;
 
-    // Label (rotated 45 degrees)
+    const d = [
+      `M ${centerX},${centerY}`, // Move to center
+      `L ${startX},${startY}`,   // Line to start
+      `A ${radius},${radius} 0 ${largeArcFlag} 1 ${endX},${endY}`, // Arc
+      'Z' // Close path
+    ].join(' ');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', color);
+    svg.appendChild(path);
+  }
+
+  // Draw pie slices
+  const startAngleReceived = 0;
+  const endAngleReceived = angles.received;
+  createArc(startAngleReceived, endAngleReceived, '#FF00FF'); // Hot pink for received
+
+  const startAngleGiven = endAngleReceived;
+  const endAngleGiven = startAngleGiven + angles.given;
+  createArc(startAngleGiven, endAngleGiven, '#00FF00'); // Neon green for given
+
+  // Add labels with values
+  const labelData = [
+    { name: 'Received Audits', value: received, angle: angles.received / 2, color: '#FF00FF' },
+    { name: 'Given Audits', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
+  ];
+
+  labelData.forEach(data => {
+    const labelX = centerX + (radius * 0.7) * Math.cos(data.angle);
+    const labelY = centerY + (radius * 0.7) * Math.sin(data.angle);
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    text.setAttribute('x', padding + i * barWidth + (barWidth - 10) / 2);
-    text.setAttribute('y', height - padding + 25);
-    text.setAttribute('text-anchor', 'end');
-    text.setAttribute('transform', `rotate(-45, ${padding + i * barWidth + (barWidth - 10) / 2}, ${height - padding + 25})`);
-    text.textContent = p[0];
+    text.setAttribute('x', labelX);
+    text.setAttribute('y', labelY);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', '#000000');
+    text.setAttribute('font-family', 'Arial');
+    text.setAttribute('font-size', '16');
+    text.textContent = `${data.name}: ${data.value}`;
     svg.appendChild(text);
   });
 
-  // Draw Y-axis
-  const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  yAxis.setAttribute('x1', padding);
-  yAxis.setAttribute('y1', padding);
-  yAxis.setAttribute('x2', padding);
-  yAxis.setAttribute('y2', height - padding);
-  yAxis.setAttribute('stroke', 'black');
-  svg.appendChild(yAxis);
-
-  // Y-axis scale (XP values)
-  const yTicks = 5;
-  for (let i = 0; i <= yTicks; i++) {
-    const y = height - padding - (i / yTicks) * (height - 2 * padding);
-    const value = (i / yTicks) * maxXP;
-    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    tick.setAttribute('x1', padding - 5);
-    tick.setAttribute('y1', y);
-    tick.setAttribute('x2', padding);
-    tick.setAttribute('y2', y);
-    tick.setAttribute('stroke', 'black');
-    svg.appendChild(tick);
-
-    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', padding - 10);
-    label.setAttribute('y', y + 5);
-    label.setAttribute('text-anchor', 'end');
-    label.textContent = Math.round(value).toString();
-    svg.appendChild(label);
-  }
+  // Add title
+  const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  title.setAttribute('x', centerX);
+  title.setAttribute('y', 30);
+  title.setAttribute('text-anchor', 'middle');
+  title.setAttribute('fill', '#FF00FF');
+  title.setAttribute('font-family', 'Arial');
+  title.setAttribute('font-size', '20');
+  title.textContent = 'Audit Ratio';
+  svg.appendChild(title);
 }
