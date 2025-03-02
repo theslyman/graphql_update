@@ -167,7 +167,15 @@ function renderXpOverTime(transactions) {
   const svg = document.getElementById('xp-over-time');
   svg.innerHTML = ''; // Clear previous content
 
-  if (transactions.length === 0) return;
+  if (transactions.length === 0) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '50%');
+    text.setAttribute('y', '50%');
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = 'No XP data available';
+    svg.appendChild(text);
+    return;
+  }
 
   // Calculate cumulative XP
   let cumulativeXP = 0;
@@ -179,20 +187,17 @@ function renderXpOverTime(transactions) {
   // SVG dimensions
   const width = 500;
   const height = 300;
-  const padding = 40;
+  const padding = 50; // Increased padding for labels
 
   // Scales
   const minDate = new Date(Math.min(...data.map(d => d.date)));
   const maxDate = new Date(Math.max(...data.map(d => d.date)));
   const maxXP = Math.max(...data.map(d => d.xp));
-
   const xScale = (date) => ((date - minDate) / (maxDate - minDate)) * (width - 2 * padding) + padding;
   const yScale = (xp) => height - padding - (xp / maxXP) * (height - 2 * padding);
 
-  // Line path
-  const path = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(d.date)},${yScale(d.xp)}`).join(' ');
-
   // Draw line
+  const path = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(d.date)},${yScale(d.xp)}`).join(' ');
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   line.setAttribute('d', path);
   line.setAttribute('stroke', 'blue');
@@ -215,6 +220,48 @@ function renderXpOverTime(transactions) {
   yAxis.setAttribute('y2', height - padding);
   yAxis.setAttribute('stroke', 'black');
   svg.appendChild(yAxis);
+
+  // Y-axis scale (XP values)
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = height - padding - (i / yTicks) * (height - 2 * padding);
+    const value = (i / yTicks) * maxXP;
+    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    tick.setAttribute('x1', padding - 5);
+    tick.setAttribute('y1', y);
+    tick.setAttribute('x2', padding);
+    tick.setAttribute('y2', y);
+    tick.setAttribute('stroke', 'black');
+    svg.appendChild(tick);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', padding - 10);
+    label.setAttribute('y', y + 5);
+    label.setAttribute('text-anchor', 'end');
+    label.textContent = Math.round(value).toString();
+    svg.appendChild(label);
+  }
+
+  // X-axis scale (dates)
+  const xTicks = 5;
+  for (let i = 0; i <= xTicks; i++) {
+    const x = padding + (i / xTicks) * (width - 2 * padding);
+    const date = new Date(minDate.getTime() + (i / xTicks) * (maxDate - minDate));
+    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    tick.setAttribute('x1', x);
+    tick.setAttribute('y1', height - padding);
+    tick.setAttribute('x2', x);
+    tick.setAttribute('y2', height - padding + 5);
+    tick.setAttribute('stroke', 'black');
+    svg.appendChild(tick);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', x);
+    label.setAttribute('y', height - padding + 20);
+    label.setAttribute('text-anchor', 'middle');
+    label.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    svg.appendChild(label);
+  }
 }
 
 // Render XP per project graph (bar chart)
@@ -222,7 +269,15 @@ function renderXpPerProject(transactions) {
   const svg = document.getElementById('xp-per-project');
   svg.innerHTML = ''; // Clear previous content
 
-  if (transactions.length === 0) return;
+  if (transactions.length === 0) {
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', '50%');
+    text.setAttribute('y', '50%');
+    text.setAttribute('text-anchor', 'middle');
+    text.textContent = 'No XP data available';
+    svg.appendChild(text);
+    return;
+  }
 
   // Group by project name and sum XP
   const projectXP = {};
@@ -237,7 +292,7 @@ function renderXpPerProject(transactions) {
   // SVG dimensions
   const width = 500;
   const height = 300;
-  const padding = 40;
+  const padding = 50; // Increased padding for labels
   const barWidth = (width - 2 * padding) / projects.length;
 
   // Scales
@@ -253,16 +308,17 @@ function renderXpPerProject(transactions) {
     bar.setAttribute('fill', 'green');
     svg.appendChild(bar);
 
-    // Label
+    // Label (rotated 45 degrees)
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', padding + i * barWidth + (barWidth - 10) / 2);
-    text.setAttribute('y', height - padding + 20);
-    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('y', height - padding + 25);
+    text.setAttribute('text-anchor', 'end');
+    text.setAttribute('transform', `rotate(-45, ${padding + i * barWidth + (barWidth - 10) / 2}, ${height - padding + 25})`);
     text.textContent = p[0];
     svg.appendChild(text);
   });
 
-  // Draw y-axis
+  // Draw Y-axis
   const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   yAxis.setAttribute('x1', padding);
   yAxis.setAttribute('y1', padding);
@@ -270,4 +326,25 @@ function renderXpPerProject(transactions) {
   yAxis.setAttribute('y2', height - padding);
   yAxis.setAttribute('stroke', 'black');
   svg.appendChild(yAxis);
+
+  // Y-axis scale (XP values)
+  const yTicks = 5;
+  for (let i = 0; i <= yTicks; i++) {
+    const y = height - padding - (i / yTicks) * (height - 2 * padding);
+    const value = (i / yTicks) * maxXP;
+    const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    tick.setAttribute('x1', padding - 5);
+    tick.setAttribute('y1', y);
+    tick.setAttribute('x2', padding);
+    tick.setAttribute('y2', y);
+    tick.setAttribute('stroke', 'black');
+    svg.appendChild(tick);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', padding - 10);
+    label.setAttribute('y', y + 5);
+    label.setAttribute('text-anchor', 'end');
+    label.textContent = Math.round(value).toString();
+    svg.appendChild(label);
+  }
 }
