@@ -28,13 +28,18 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (!response.ok) throw new Error('Invalid credentials');
 
     const data = await response.json();
-    localStorage.setItem('jwt', data.token);
+    console.log('Login Response:', data); // Log the full response
+    // Ensure we store only the token string
+    const token = typeof data === 'string' ? data : data.token;
+    if (!token) throw new Error('No token found in response');
+    localStorage.setItem('jwt', token);
+    console.log('Stored JWT:', localStorage.getItem('jwt')); // Log what’s stored
     showProfile();
   } catch (error) {
+    console.error('Login Error:', error.message);
     errorMessage.style.display = 'block';
   }
 });
-
 // Logout
 logoutButton.addEventListener('click', () => {
   localStorage.removeItem('jwt');
