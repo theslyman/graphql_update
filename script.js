@@ -40,6 +40,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     errorMessage.style.display = 'block';
   }
 });
+
 // Logout
 logoutButton.addEventListener('click', () => {
   localStorage.removeItem('jwt');
@@ -142,7 +143,7 @@ async function showProfile() {
       }
     `);
     console.log('Raw Audit Data Response:', auditData);
-    renderAuditsRatio({
+    renderAuditRatio({
       received: auditData.data?.received?.aggregate?.count || 0,
       given: auditData.data?.given?.aggregate?.count || 0
     });
@@ -155,6 +156,7 @@ async function showProfile() {
     }
   }
 }
+
 // Helper function to fetch GraphQL data
 async function fetchGraphQL(jwt, query) {
   const response = await fetch('https://learn.reboot01.com/api/graphql-engine/v1/graphql', {
@@ -272,12 +274,12 @@ function renderXpOverTime(transactions) {
   }
 }
 
-/// Render audits Ratio as a pie chart
-function renderauditsRatio(auditsData) {
+// Render Audit Ratio as a pie chart
+function renderAuditRatio(auditData) {
   const svg = document.getElementById('xp-per-project'); // Reuse existing SVG element
   svg.innerHTML = ''; // Clear previous content
 
-  const { received, given } = auditsData;
+  const { received, given } = auditData;
   const total = received + given;
 
   if (total === 0) {
@@ -285,7 +287,7 @@ function renderauditsRatio(auditsData) {
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
-    text.textContent = 'No audits data available';
+    text.textContent = 'No audit data available';
     svg.appendChild(text);
     return;
   }
@@ -335,8 +337,8 @@ function renderauditsRatio(auditsData) {
 
   // Add labels with values
   const labelData = [
-    { name: 'Received auditss', value: received, angle: angles.received / 2, color: '#FF00FF' },
-    { name: 'Given auditss', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
+    { name: 'Received Audits', value: received, angle: angles.received / 2, color: '#FF00FF' },
+    { name: 'Given Audits', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
   ];
 
   labelData.forEach(data => {
@@ -361,6 +363,6 @@ function renderauditsRatio(auditsData) {
   title.setAttribute('fill', '#FF00FF');
   title.setAttribute('font-family', 'Arial');
   title.setAttribute('font-size', '20');
-  title.textContent = 'audits Ratio';
+  title.textContent = 'Audit Ratio';
   svg.appendChild(title);
 }
