@@ -119,25 +119,25 @@ async function showProfile() {
     `);
     renderXpOverTime(xpOverTimeData.data?.transaction || []);
 
-    // Fetch audit data (replace XP per project)
-    const auditData = await fetchGraphQL(jwt, `
+    // Fetch audits data (replace XP per project)
+    const auditsData = await fetchGraphQL(jwt, `
       {
-        received: transaction_aggregate(where: { type: { _eq: "audit" }, path: { _like: "%received%" } }) {
+        received: transaction_aggregate(where: { type: { _eq: "audits" }, path: { _like: "%received%" } }) {
           aggregate {
             count
           }
         }
-        given: transaction_aggregate(where: { type: { _eq: "audit" }, path: { _like: "%given%" } }) {
+        given: transaction_aggregate(where: { type: { _eq: "audits" }, path: { _like: "%given%" } }) {
           aggregate {
             count
           }
         }
       }
     `);
-    console.log('Audit Data:', auditData);
-    renderAuditRatio({
-      received: auditData.data?.received?.aggregate?.count || 0,
-      given: auditData.data?.given?.aggregate?.count || 0
+    console.log('audits Data:', auditsData);
+    renderauditsRatio({
+      received: auditsData.data?.received?.aggregate?.count || 0,
+      given: auditsData.data?.given?.aggregate?.count || 0
     });
 
   } catch (error) {
@@ -265,12 +265,12 @@ function renderXpOverTime(transactions) {
   }
 }
 
-/// Render Audit Ratio as a pie chart
-function renderAuditRatio(auditData) {
+/// Render audits Ratio as a pie chart
+function renderauditsRatio(auditsData) {
   const svg = document.getElementById('xp-per-project'); // Reuse existing SVG element
   svg.innerHTML = ''; // Clear previous content
 
-  const { received, given } = auditData;
+  const { received, given } = auditsData;
   const total = received + given;
 
   if (total === 0) {
@@ -278,7 +278,7 @@ function renderAuditRatio(auditData) {
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
-    text.textContent = 'No audit data available';
+    text.textContent = 'No audits data available';
     svg.appendChild(text);
     return;
   }
@@ -328,8 +328,8 @@ function renderAuditRatio(auditData) {
 
   // Add labels with values
   const labelData = [
-    { name: 'Received Audits', value: received, angle: angles.received / 2, color: '#FF00FF' },
-    { name: 'Given Audits', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
+    { name: 'Received auditss', value: received, angle: angles.received / 2, color: '#FF00FF' },
+    { name: 'Given auditss', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
   ];
 
   labelData.forEach(data => {
@@ -354,6 +354,6 @@ function renderAuditRatio(auditData) {
   title.setAttribute('fill', '#FF00FF');
   title.setAttribute('font-family', 'Arial');
   title.setAttribute('font-size', '20');
-  title.textContent = 'Audit Ratio';
+  title.textContent = 'audits Ratio';
   svg.appendChild(title);
 }
