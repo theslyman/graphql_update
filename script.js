@@ -142,7 +142,7 @@ async function showProfile() {
       }
     `);
     console.log('Raw Audit Data Response:', auditData);
-    renderAuditRatio({
+    renderAuditsRatio({
       received: auditData.data?.received?.aggregate?.count || 0,
       given: auditData.data?.given?.aggregate?.count || 0
     });
