@@ -119,25 +119,32 @@ async function showProfile() {
     `);
     renderXpOverTime(xpOverTimeData.data?.transaction || []);
 
-    // Fetch audits data (replace XP per project)
-    const auditsData = await fetchGraphQL(jwt, `
+    // Fetch audit data
+    const auditData = await fetchGraphQL(jwt, `
       {
-        received: transaction_aggregate(where: { type: { _eq: "audits" }, path: { _like: "%received%" } }) {
+        received: transaction_aggregate(where: { type: { _eq: "down" } }) {
           aggregate {
             count
           }
         }
-        given: transaction_aggregate(where: { type: { _eq: "audits" }, path: { _like: "%given%" } }) {
+        given: transaction_aggregate(where: { type: { _eq: "up" } }) {
           aggregate {
             count
           }
+        }
+        allTransactions: transaction {
+          id
+          type
+          amount
+          path
+          createdAt
         }
       }
     `);
-    console.log('audits Data:', auditsData);
-    renderauditsRatio({
-      received: auditsData.data?.received?.aggregate?.count || 0,
-      given: auditsData.data?.given?.aggregate?.count || 0
+    console.log('Raw Audit Data Response:', auditData);
+    renderAuditRatio({
+      received: auditData.data?.received?.aggregate?.count || 0,
+      given: auditData.data?.given?.aggregate?.count || 0
     });
 
   } catch (error) {
