@@ -1,75 +1,222 @@
-/* style.css */
+/* Import a futuristic font */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+/* Global styles */
 body {
-  background-color: #00FFFF; /* Cyan background */
-  font-family: "Arial", "Times New Roman", sans-serif;
-  color: #000000;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   margin: 0;
-  padding: 20px;
+  overflow: hidden;
 }
 
-h2, h3 {
-  color: #FF00FF; /* Hot pink */
-  text-align: center;
-  text-decoration: underline;
-}
-
-#login-section, #profile-section {
-  background-color: #FFFFFF;
-  border: 5px solid #000000;
-  padding: 20px;
-  width: 50%;
-  margin: 0 auto;
-  box-shadow: 10px 10px 0px #000000; /* Fake 3D effect */
-}
-
-label {
-  font-weight: bold;
-  color: #0000FF; /* Blue */
-}
-
-input, button {
-  display: block;
+/* Background grid for cyberpunk vibe */
+body::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  margin: 10px 0;
-  padding: 5px;
-  font-family: "Arial", sans-serif;
-  border: 2px solid #FF0000; /* Red border */
+  height: 100%;
+  background-image: linear-gradient(#0ff 1px, transparent 1px),
+                    linear-gradient(90deg, #0ff 1px, transparent 1px);
+  background-size: 20px 20px;
+  opacity: 0.1;
+  z-index: -1;
 }
 
-button {
-  background-color: #00FF00; /* Neon green */
-  color: #000000;
+/* Login Section */
+#login-section {
+  background-color: #111;
+  padding: 20px;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 15px #0ff;
+  border-radius: 5px;
+  width: 300px;
+  transition: opacity 0.5s ease;
+}
+
+#login-section h2 {
+  text-align: center;
+  color: #0ff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Glitch effect for headings */
+h2 {
+  position: relative;
+}
+
+h2::before,
+h2::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #0ff;
+}
+
+h2::before {
+  left: 2px;
+  text-shadow: -1px 0 #f00;
+  animation: glitch 2s infinite;
+}
+
+h2::after {
+  left: -2px;
+  text-shadow: 1px 0 #00f;
+  animation: glitch 2s infinite reverse;
+}
+
+@keyframes glitch {
+  0% { clip-path: inset(10% 0 60% 0); }
+  20% { clip-path: inset(50% 0 20% 0); }
+  40% { clip-path: inset(30% 0 40% 0); }
+  60% { clip-path: inset(70% 0 10% 0); }
+  80% { clip-path: inset(20% 0 50% 0); }
+  100% { clip-path: inset(60% 0 30% 0); }
+}
+
+/* Form styling */
+#login-form label {
+  display: block;
+  margin-top: 10px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+#login-form input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  background-color: #222;
+  border: 1px solid #0ff;
+  color: #fff;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 5px #0ff;
+  box-sizing: border-box;
+}
+
+#login-form button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 20px;
+  background-color: #0ff;
+  color: #000;
+  border: none;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-button:hover {
-  background-color: #FFFF00; /* Yellow hover */
+#login-form button:hover {
+  background-color: #00cccc;
+  box-shadow: 0 0 10px #00cccc;
 }
 
 #error-message {
-  color: #FF0000;
-  font-weight: bold;
   text-align: center;
+  margin-top: 10px;
+  color: #f00;
+}
+
+/* Profile Section */
+#profile-section {
+  background-color: #111;
+  padding: 20px;
+  border: 2px solid #0ff;
+  box-shadow: 0 0 15px #0ff;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 800px;
+  transition: opacity 0.5s ease;
+}
+
+#profile-section h2 {
+  margin-bottom: 20px;
+}
+
+#logout-button {
+  background-color: #f00;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-family: 'Orbitron', sans-serif;
+  text-transform: uppercase;
+  cursor: pointer;
+  float: right;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+#logout-button:hover {
+  background-color: #cc0000;
+  box-shadow: 0 0 10px #cc0000;
 }
 
 #user-info p {
-  font-size: 16px;
   margin: 10px 0;
+  padding: 10px;
+  background-color: #222;
+  border: 1px solid #0ff;
+  box-shadow: 0 0 5px #0ff;
 }
 
 #graphs {
   margin-top: 20px;
 }
 
-/* Retro marquee effect */
-marquee {
-  color: #FF00FF;
-  font-size: 18px;
-  margin: 10px 0;
+#graphs h3 {
+  color: #0ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-/* SVG styling */
-svg {
-  border: 3px dashed #0000FF; /* Blue dashed border */
-  background-color: #FFFFFF;
+/* Graph styling */
+.graph-line {
+  stroke: #0ff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px #0ff);
+}
+
+.graph-axis {
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.graph-bar {
+  fill: #0ff;
+  filter: drop-shadow(0 0 5px #0ff);
+}
+
+.graph-label {
+  fill: #fff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+}
+
+/* Hide sections when not displayed */
+.hidden {
+  opacity: 0;
+  display: none;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+  #login-section,
+  #profile-section {
+    width: 90%;
+  }
+  #xp-over-time,
+  #xp-per-project {
+    width: 100%;
+    height: 200px;
+  }
 }
