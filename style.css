@@ -1,75 +1,75 @@
 /* style.css */
 body {
-    background-color: #00FFFF; /* Cyan background */
-    font-family: "Arial", "Times New Roman", sans-serif;
-    color: #000000;
-    margin: 0;
-    padding: 20px;
-  }
-  
-  h2, h3 {
-    color: #FF00FF; /* Hot pink */
-    text-align: center;
-    text-decoration: underline;
-  }
-  
-  #login-section, #profile-section {
-    background-color: #FFFFFF;
-    border: 5px solid #000000;
-    padding: 20px;
-    width: 50%;
-    margin: 0 auto;
-    box-shadow: 10px 10px 0px #000000; /* Fake 3D effect */
-  }
-  
-  label {
-    font-weight: bold;
-    color: #0000FF; /* Blue */
-  }
-  
-  input, button {
-    display: block;
-    width: 100%;
-    margin: 10px 0;
-    padding: 5px;
-    font-family: "Arial", sans-serif;
-    border: 2px solid #FF0000; /* Red border */
-  }
-  
-  button {
-    background-color: #00FF00; /* Neon green */
-    color: #000000;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #FFFF00; /* Yellow hover */
-  }
-  
-  #error-message {
-    color: #FF0000;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  #user-info p {
-    font-size: 16px;
-    margin: 10px 0;
-  }
-  
-  #graphs {
-    margin-top: 20px;
-  }
-  
-  /* Retro marquee effect */
-  marquee {
-    color: #FF00FF;
-    font-size: 18px;
-    margin: 10px 0;
-  }
-  
-  /* SVG styling */
-  svg {
-    border: 3px dashed #0000FF; /* Blue dashed border */
-    background-color: #FFFFFF;
-  }
+  background-color: #00FFFF; /* Cyan background */
+  font-family: "Arial", "Times New Roman", sans-serif;
+  color: #000000;
+  margin: 0;
+  padding: 20px;
+}
+
+h2, h3 {
+  color: #FF00FF; /* Hot pink */
+  text-align: center;
+  text-decoration: underline;
+}
+
+#login-section, #profile-section {
+  background-color: #FFFFFF;
+  border: 5px solid #000000;
+  padding: 20px;
+  width: 50%;
+  margin: 0 auto;
+  box-shadow: 10px 10px 0px #000000; /* Fake 3D effect */
+}
+
+label {
+  font-weight: bold;
+  color: #0000FF; /* Blue */
+}
+
+input, button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 5px;
+  font-family: "Arial", sans-serif;
+  border: 2px solid #FF0000; /* Red border */
+}
+
+button {
+  background-color: #00FF00; /* Neon green */
+  color: #000000;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #FFFF00; /* Yellow hover */
+}
+
+#error-message {
+  color: #FF0000;
+  font-weight: bold;
+  text-align: center;
+}
+
+#user-info p {
+  font-size: 16px;
+  margin: 10px 0;
+}
+
+#graphs {
+  margin-top: 20px;
+}
+
+/* Retro marquee effect */
+marquee {
+  color: #FF00FF;
+  font-size: 18px;
+  margin: 10px 0;
+}
+
+/* SVG styling */
+svg {
+  border: 3px dashed #0000FF; /* Blue dashed border */
+  background-color: #FFFFFF;
+}
