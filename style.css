@@ -8,10 +8,10 @@ body {
   font-family: 'Orbitron', sans-serif;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start; /* Changed from center to allow top alignment */
   min-height: 100vh;
   margin: 0;
-  overflow: hidden;
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 /* Background grid for cyberpunk vibe */
@@ -84,6 +84,11 @@ h2::after {
   100% { clip-path: inset(60% 0 30% 0); }
 }
 
+@keyframes pulse {
+  0% { filter: drop-shadow(0 0 5px #0ff); }
+  100% { filter: drop-shadow(0 0 10px #0ff); }
+}
+
 /* Form styling */
 #login-form label {
   display: block;
@@ -138,6 +143,9 @@ h2::after {
   width: 80%;
   max-width: 800px;
   transition: opacity 0.5s ease;
+  min-height: 80vh; /* Ensure it has a minimum height */
+  overflow-y: auto; /* Allow scrolling within the profile section */
+  margin-top: 20px; /* Add some spacing from the top */
 }
 
 #profile-section h2 {
@@ -171,6 +179,8 @@ h2::after {
 
 #graphs {
   margin-top: 20px;
+  width: 100%;
+  overflow-x: auto; /* Allow horizontal scrolling if graphs are wide */
 }
 
 #graphs h3 {
@@ -181,25 +191,29 @@ h2::after {
 
 /* Graph styling */
 .graph-line {
-  stroke: #0ff;
+  stroke: #0ff; /* Cyan for consistency */
   stroke-width: 2;
   filter: drop-shadow(0 0 5px #0ff);
+  animation: pulse 1.5s infinite; /* Add a subtle glow pulse */
 }
 
 .graph-axis {
   stroke: #fff;
   stroke-width: 1;
+  opacity: 0.5; /* Slightly transparent for depth */
 }
 
 .graph-bar {
-  fill: #0ff;
-  filter: drop-shadow(0 0 5px #0ff);
+  fill: #f0f; /* Magenta for contrast */
+  filter: drop-shadow(0 0 5px #f0f);
+  animation: pulse 1.5s infinite alternate; /* Pulse effect */
 }
 
 .graph-label {
   fill: #fff;
   font-family: 'Orbitron', sans-serif;
   font-size: 12px;
+  text-shadow: 0 0 3px #0ff; /* Neon glow */
 }
 
 /* Hide sections when not displayed */
@@ -219,4 +233,34 @@ h2::after {
     width: 100%;
     height: 200px;
   }
+}
+
+#graphs h3 {
+  color: #0ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+}
+
+#graphs h3::before,
+#graphs h3::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #0ff;
+}
+
+#graphs h3::before {
+  left: 2px;
+  text-shadow: -1px 0 #f00;
+  animation: glitch 2s infinite;
+}
+
+#graphs h3::after {
+  left: -2px;
+  text-shadow: 1px 0 #00f;
+  animation: glitch 2s infinite reverse;
 }

@@ -175,52 +175,48 @@ async function fetchGraphQL(jwt, query) {
 // Render XP over time graph (line graph)
 function renderXpOverTime(transactions) {
   const svg = document.getElementById('xp-over-time');
-  svg.innerHTML = ''; // Clear previous content
+  svg.innerHTML = '';
 
   if (transactions.length === 0) {
     const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
-    text.textContent = 'No XP data available';
+    text.setAttribute('class', 'graph-label');
+    text.textContent = 'No XP Data Available';
     svg.appendChild(text);
     return;
   }
 
-  // Calculate cumulative XP
   let cumulativeXP = 0;
   const data = transactions.map(t => {
     cumulativeXP += t.amount;
     return { date: new Date(t.createdAt), xp: cumulativeXP };
   });
 
-  // SVG dimensions
   const width = 500;
   const height = 300;
-  const padding = 50; // Increased padding for labels
-
-  // Scales
+  const padding = 50;
   const minDate = new Date(Math.min(...data.map(d => d.date)));
   const maxDate = new Date(Math.max(...data.map(d => d.date)));
   const maxXP = Math.max(...data.map(d => d.xp));
   const xScale = (date) => ((date - minDate) / (maxDate - minDate)) * (width - 2 * padding) + padding;
   const yScale = (xp) => height - padding - (xp / maxXP) * (height - 2 * padding);
 
-  // Draw line
+  // Draw line with class
   const path = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(d.date)},${yScale(d.xp)}`).join(' ');
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   line.setAttribute('d', path);
-  line.setAttribute('stroke', 'blue');
-  line.setAttribute('fill', 'none');
+  line.setAttribute('class', 'graph-line');
   svg.appendChild(line);
 
-  // Draw axes
+  // Draw axes with class
   const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
   xAxis.setAttribute('x1', padding);
   xAxis.setAttribute('y1', height - padding);
   xAxis.setAttribute('x2', width - padding);
   xAxis.setAttribute('y2', height - padding);
-  xAxis.setAttribute('stroke', 'black');
+  xAxis.setAttribute('class', 'graph-axis');
   svg.appendChild(xAxis);
 
   const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -228,10 +224,10 @@ function renderXpOverTime(transactions) {
   yAxis.setAttribute('y1', padding);
   yAxis.setAttribute('x2', padding);
   yAxis.setAttribute('y2', height - padding);
-  yAxis.setAttribute('stroke', 'black');
+  yAxis.setAttribute('class', 'graph-axis');
   svg.appendChild(yAxis);
 
-  // Y-axis scale (XP values)
+  // Y-axis ticks and labels
   const yTicks = 5;
   for (let i = 0; i <= yTicks; i++) {
     const y = height - padding - (i / yTicks) * (height - 2 * padding);
@@ -241,18 +237,19 @@ function renderXpOverTime(transactions) {
     tick.setAttribute('y1', y);
     tick.setAttribute('x2', padding);
     tick.setAttribute('y2', y);
-    tick.setAttribute('stroke', 'black');
+    tick.setAttribute('class', 'graph-axis');
     svg.appendChild(tick);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', padding - 10);
     label.setAttribute('y', y + 5);
     label.setAttribute('text-anchor', 'end');
+    label.setAttribute('class', 'graph-label');
     label.textContent = Math.round(value).toString();
     svg.appendChild(label);
   }
 
-  // X-axis scale (dates)
+  // X-axis ticks and labels
   const xTicks = 5;
   for (let i = 0; i <= xTicks; i++) {
     const x = padding + (i / xTicks) * (width - 2 * padding);
@@ -262,13 +259,14 @@ function renderXpOverTime(transactions) {
     tick.setAttribute('y1', height - padding);
     tick.setAttribute('x2', x);
     tick.setAttribute('y2', height - padding + 5);
-    tick.setAttribute('stroke', 'black');
+    tick.setAttribute('class', 'graph-axis');
     svg.appendChild(tick);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', x);
     label.setAttribute('y', height - padding + 20);
     label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('class', 'graph-label');
     label.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     svg.appendChild(label);
   }
@@ -276,8 +274,8 @@ function renderXpOverTime(transactions) {
 
 // Render Audit Ratio as a pie chart
 function renderAuditRatio(auditData) {
-  const svg = document.getElementById('xp-per-project'); // Reuse existing SVG element
-  svg.innerHTML = ''; // Clear previous content
+  const svg = document.getElementById('xp-per-project');
+  svg.innerHTML = '';
 
   const { received, given } = auditData;
   const total = received + given;
@@ -287,25 +285,23 @@ function renderAuditRatio(auditData) {
     text.setAttribute('x', '50%');
     text.setAttribute('y', '50%');
     text.setAttribute('text-anchor', 'middle');
-    text.textContent = 'No audit data available';
+    text.setAttribute('class', 'graph-label');
+    text.textContent = 'No Audit Data Available';
     svg.appendChild(text);
     return;
   }
 
-  // SVG dimensions
   const width = 500;
   const height = 300;
-  const radius = Math.min(width, height) / 2 - 50; // Leave space for labels
+  const radius = Math.min(width, height) / 2 - 50;
   const centerX = width / 2;
   const centerY = height / 2;
 
-  // Pie chart data
   const angles = {
     received: (received / total) * 2 * Math.PI,
     given: (given / total) * 2 * Math.PI
   };
 
-  // Function to create arc path
   function createArc(startAngle, endAngle, color) {
     const startX = centerX + radius * Math.cos(startAngle);
     const startY = centerY + radius * Math.sin(startAngle);
@@ -314,31 +310,30 @@ function renderAuditRatio(auditData) {
     const largeArcFlag = endAngle - startAngle <= Math.PI ? 0 : 1;
 
     const d = [
-      `M ${centerX},${centerY}`, // Move to center
-      `L ${startX},${startY}`,   // Line to start
-      `A ${radius},${radius} 0 ${largeArcFlag} 1 ${endX},${endY}`, // Arc
-      'Z' // Close path
+      `M ${centerX},${centerY}`,
+      `L ${startX},${startY}`,
+      `A ${radius},${radius} 0 ${largeArcFlag} 1 ${endX},${endY}`,
+      'Z'
     ].join(' ');
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
     path.setAttribute('fill', color);
+    path.setAttribute('class', 'graph-bar'); // Use graph-bar for styling
     svg.appendChild(path);
   }
 
-  // Draw pie slices
   const startAngleReceived = 0;
   const endAngleReceived = angles.received;
-  createArc(startAngleReceived, endAngleReceived, '#FF00FF'); // Hot pink for received
+  createArc(startAngleReceived, endAngleReceived, '#0ff'); // Cyan for received
 
   const startAngleGiven = endAngleReceived;
   const endAngleGiven = startAngleGiven + angles.given;
-  createArc(startAngleGiven, endAngleGiven, '#00FF00'); // Neon green for given
+  createArc(startAngleGiven, endAngleGiven, '#f0f'); // Magenta for given
 
-  // Add labels with values
   const labelData = [
-    { name: 'Received Audits', value: received, angle: angles.received / 2, color: '#FF00FF' },
-    { name: 'Given Audits', value: given, angle: startAngleGiven + angles.given / 2, color: '#00FF00' }
+    { name: 'Received', value: received, angle: angles.received / 2 },
+    { name: 'Given', value: given, angle: startAngleGiven + angles.given / 2 }
   ];
 
   labelData.forEach(data => {
@@ -348,21 +343,8 @@ function renderAuditRatio(auditData) {
     text.setAttribute('x', labelX);
     text.setAttribute('y', labelY);
     text.setAttribute('text-anchor', 'middle');
-    text.setAttribute('fill', '#000000');
-    text.setAttribute('font-family', 'Arial');
-    text.setAttribute('font-size', '16');
+    text.setAttribute('class', 'graph-label');
     text.textContent = `${data.name}: ${data.value}`;
     svg.appendChild(text);
   });
-
-  // Add title
-  const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-  title.setAttribute('x', centerX);
-  title.setAttribute('y', 30);
-  title.setAttribute('text-anchor', 'middle');
-  title.setAttribute('fill', '#FF00FF');
-  title.setAttribute('font-family', 'Arial');
-  title.setAttribute('font-size', '20');
-  title.textContent = 'Audit Ratio';
-  svg.appendChild(title);
 }
