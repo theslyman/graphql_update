@@ -196,54 +196,60 @@ function renderXpOverTime(transactions) {
 
   const width = 500;
   const height = 300;
-  const padding = 50;
+  const paddingTopBottom = 50; // Padding for top and bottom
+  const paddingLeft = 80; // Increased left padding for labels
+  const paddingRight = 50; // Right padding
   const minDate = new Date(Math.min(...data.map(d => d.date)));
   const maxDate = new Date(Math.max(...data.map(d => d.date)));
   const maxXP = Math.max(...data.map(d => d.xp));
-  const xScale = (date) => ((date - minDate) / (maxDate - minDate)) * (width - 2 * padding) + padding;
-  const yScale = (xp) => height - padding - (xp / maxXP) * (height - 2 * padding);
+  const xScale = (date) => ((date - minDate) / (maxDate - minDate)) * (width - paddingLeft - paddingRight) + paddingLeft;
+  const yScale = (xp) => height - paddingTopBottom - (xp / maxXP) * (height - 2 * paddingTopBottom);
 
-  // Draw line with class
+  // Draw line
   const path = data.map((d, i) => `${i === 0 ? 'M' : 'L'}${xScale(d.date)},${yScale(d.xp)}`).join(' ');
   const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
   line.setAttribute('d', path);
   line.setAttribute('class', 'graph-line');
   svg.appendChild(line);
 
-  // Draw axes with class
+  // Draw X-axis
   const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  xAxis.setAttribute('x1', padding);
-  xAxis.setAttribute('y1', height - padding);
-  xAxis.setAttribute('x2', width - padding);
-  xAxis.setAttribute('y2', height - padding);
+  xAxis.setAttribute('x1', paddingLeft);
+  xAxis.setAttribute('y1', height - paddingTopBottom);
+  xAxis.setAttribute('x2', width - paddingRight);
+  xAxis.setAttribute('y2', height - paddingTopBottom);
   xAxis.setAttribute('class', 'graph-axis');
   svg.appendChild(xAxis);
 
+  // Draw Y-axis
   const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  yAxis.setAttribute('x1', padding);
-  yAxis.setAttribute('y1', padding);
-  yAxis.setAttribute('x2', padding);
-  yAxis.setAttribute('y2', height - padding);
+  yAxis.setAttribute('x1', paddingLeft);
+  yAxis.setAttribute('y1', paddingTopBottom);
+  yAxis.setAttribute('x2', paddingLeft);
+  yAxis.setAttribute('y2', height - paddingTopBottom);
   yAxis.setAttribute('class', 'graph-axis');
   svg.appendChild(yAxis);
 
   // Y-axis ticks and labels
   const yTicks = 5;
   for (let i = 0; i <= yTicks; i++) {
-    const y = height - padding - (i / yTicks) * (height - 2 * padding);
+    const y = height - paddingTopBottom - (i / yTicks) * (height - 2 * paddingTopBottom);
     const value = (i / yTicks) * maxXP;
+
+    // Draw tick mark
     const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    tick.setAttribute('x1', padding - 5);
+    tick.setAttribute('x1', paddingLeft - 5); // Tick starts slightly left of Y-axis
     tick.setAttribute('y1', y);
-    tick.setAttribute('x2', padding);
+    tick.setAttribute('x2', paddingLeft); // Tick ends at Y-axis
     tick.setAttribute('y2', y);
     tick.setAttribute('class', 'graph-axis');
     svg.appendChild(tick);
 
+    // Draw label with more space from the left edge
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    label.setAttribute('x', padding - 10);
-    label.setAttribute('y', y + 5);
-    label.setAttribute('text-anchor', 'end');
+    label.setAttribute('x', paddingLeft - 10); // Adjusted to ensure visibility (closer to Y-axis but still left)
+    label.setAttribute('y', y + 5); // Slight vertical offset
+    label.setAttribute('text-anchor', 'end'); // Text ends at this x position
     label.setAttribute('class', 'graph-label');
     label.textContent = Math.round(value).toString();
     svg.appendChild(label);
@@ -252,19 +258,19 @@ function renderXpOverTime(transactions) {
   // X-axis ticks and labels
   const xTicks = 5;
   for (let i = 0; i <= xTicks; i++) {
-    const x = padding + (i / xTicks) * (width - 2 * padding);
+    const x = paddingLeft + (i / xTicks) * (width - paddingLeft - paddingRight);
     const date = new Date(minDate.getTime() + (i / xTicks) * (maxDate - minDate));
     const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     tick.setAttribute('x1', x);
-    tick.setAttribute('y1', height - padding);
+    tick.setAttribute('y1', height - paddingTopBottom);
     tick.setAttribute('x2', x);
-    tick.setAttribute('y2', height - padding + 5);
+    tick.setAttribute('y2', height - paddingTopBottom + 5);
     tick.setAttribute('class', 'graph-axis');
     svg.appendChild(tick);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     label.setAttribute('x', x);
-    label.setAttribute('y', height - padding + 20);
+    label.setAttribute('y', height - paddingTopBottom + 20);
     label.setAttribute('text-anchor', 'middle');
     label.setAttribute('class', 'graph-label');
     label.textContent = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
