@@ -1,4 +1,4 @@
 open the project here 
 
-https://theslyman.github.io/graphql/
+https://theslyman.github.io/graph/
 
