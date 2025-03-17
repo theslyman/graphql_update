@@ -157,6 +157,7 @@ func main() {
 				auditRatio
 				totalUp
 				totalDown
+				audits
 			}
 		}
 	`, "GraphQL query to execute")

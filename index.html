@@ -26,9 +26,19 @@
     <button id="logout-button">Logout</button>
     <marquee>Welcome to the Reboot Student Report Page!</marquee>
     <div id="user-info">
+      <p><strong>ID:</strong> <span id="user-id"></span></p>
       <p><strong>Username:</strong> <span id="username"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>First Name:</strong> <span id="first-name"></span></p>
+      <p><strong>Last Name:</strong> <span id="last-name"></span></p>
+      <p><strong>Campus:</strong> <span id="campus"></span></p>
       <p><strong>Total XP:</strong> <span id="total-xp"></span></p>
-      <p><strong>Pass/Fail Ratio:</strong> <span id="pass-fail-ratio"></span></p>
+      <p><strong>Audits Assigned:</strong> <span id="audits-assigned"></span></p>
+      <div id="attributes">
+        <strong>Attributes:</strong>
+        <!-- Individual attributes will be appended here dynamically -->
+      </div>
+      <p><strong>Records Count:</strong> <span id="records-count"></span></p>
     </div>
     <div id="graphs">
       <h3>XP Over Time</h3>
