@@ -52,6 +52,18 @@ function showLogin() {
   profileSection.style.display = 'none';
 }
 
+function decodeJwtPayload(token) {
+  try {
+    const base64Url = token.split('.')[1]; // Get the payload (second part)
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Convert base64url to base64
+    const jsonPayload = atob(base64); // Decode base64 to string
+    return JSON.parse(jsonPayload); // Parse to JSON
+  } catch (error) {
+    console.error('Error decoding JWT:', error);
+    return null;
+  }
+} 
+
 // Show profile section and fetch data
 async function showProfile() {
   loginSection.style.display = 'none';
@@ -64,11 +76,21 @@ async function showProfile() {
     return;
   }
 
+  // Decode JWT to get user ID
+  const payload = decodeJwtPayload(jwt);
+  if (!payload || !payload.sub) {
+    console.error('Invalid JWT payload or missing user ID');
+    localStorage.removeItem('jwt');
+    showLogin();
+    return;
+  }
+  const userId = payload.sub; // Use 'sub' as the user ID field; adjust if different
+
   try {
-    // Fetch user info
+    // Fetch user info using the authenticated user's ID
     const userData = await fetchGraphQL(jwt, `
       {
-        user(where: {id: {_eq: "767"}}) {
+        user(where: {id: {_eq: "${userId}"}}) {
           id
           login
           email
@@ -86,7 +108,7 @@ async function showProfile() {
     `);
     console.log('Raw User Data Response:', userData);
     if (!userData.data?.user?.length) throw new Error('User data not found or empty');
-    const user = userData.data.user[0]; // Assuming single user with ID "767"
+    const user = userData.data.user[0]; // Single user matching the ID
     document.getElementById('user-id').textContent = user.id || 'N/A';
     document.getElementById('username').textContent = user.login || 'N/A';
     document.getElementById('email').textContent = user.email || 'N/A';
@@ -98,10 +120,9 @@ async function showProfile() {
 
     // Handle attributes
     const attrsContainer = document.getElementById('attributes');
-    attrsContainer.innerHTML = '<strong>Attributes:</strong>'; // Reset content
+    attrsContainer.innerHTML = '<strong>Attributes:</strong>';
     if (user.attrs && typeof user.attrs === 'object') {
       Object.entries(user.attrs).forEach(([key, value]) => {
-        // Skip duplicates and unwanted fields
         if (['email', 'firstName', 'lastName', 'id-cardUploadId', 'pro-picUploadId'].includes(key)) return;
         const p = document.createElement('p');
         p.innerHTML = `<span class="attr-key">${key}:</span> <span class="attr-value">${value || 'N/A'}</span>`;
@@ -139,7 +160,7 @@ async function showProfile() {
     `);
     renderXpOverTime(xpOverTimeData.data?.transaction || []);
 
-    // Render audit ratio as a pie chart
+    // Render audit ratio
     renderAuditRatio({ auditRatio: user.auditRatio || 0 });
 
   } catch (error) {
